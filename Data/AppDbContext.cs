@@ -8,6 +8,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Owner> Owners => Set<Owner>();
     public DbSet<Car> Cars => Set<Car>();
     public DbSet<InsurancePolicy> Policies => Set<InsurancePolicy>();
+    public DbSet<Claim> Claims => Set<Claim>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -15,15 +16,26 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasIndex(c => c.Vin)
             .IsUnique(false); // TODO: set true and handle conflicts
 
-        
+        modelBuilder.Entity<Car>()
+            .Property(c => c.Vin)
+            .IsRequired();
+
         modelBuilder.Entity<InsurancePolicy>()
             .Property(p => p.StartDate)
             .IsRequired();
 
-        // EndDate intentionally left nullable for a later task
         modelBuilder.Entity<InsurancePolicy>()
             .Property(p => p.EndDate)
             .IsRequired();
+
+        modelBuilder.Entity<Claim>()
+            .HasIndex(c => c.Id)
+            .IsUnique();
+
+        modelBuilder.Entity<Claim>()
+            .Property(c => c.Amount)
+            .HasColumnType("decimal(18,2)");
+
     }
 }
 

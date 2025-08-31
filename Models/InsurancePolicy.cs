@@ -14,5 +14,6 @@ public class InsurancePolicy
     public DateOnly StartDate { get; set; }
     
     [Required]
-    public DateOnly EndDate { get; set; } // intentionally nullable; will be enforced later
+    public DateOnly EndDate { get; set; } 
+
 }

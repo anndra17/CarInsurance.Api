@@ -14,7 +14,10 @@ builder.Services.AddScoped<CarService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddScoped<ICarService, CarService>();
+builder.Services.AddScoped<IClaimService, ClaimService>(); 
+
 
 var app = builder.Build();
 
