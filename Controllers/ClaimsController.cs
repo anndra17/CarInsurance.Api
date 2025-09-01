@@ -29,9 +29,12 @@ namespace CarInsurance.Api.Controllers
             long carId,
             [FromBody] CreateClaimRequest request)
         {
+            if (!DateOnly.TryParse(request.ClaimDate, out var claimDate))
+                return BadRequest("Invalid claim date format. Use YYYY-MM-DD.");
+          
             try
             {
-                var claim = await _claimService.CreateClaimAsync(carId, request);
+                var claim = await _claimService.CreateClaimAsync(carId, request, claimDate);
                 return CreatedAtAction(nameof(GetClaim), new { claimId = claim.Id }, claim);
             }
             catch (KeyNotFoundException)

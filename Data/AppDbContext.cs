@@ -14,7 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         modelBuilder.Entity<Car>()
             .HasIndex(c => c.Vin)
-            .IsUnique(false); // TODO: set true and handle conflicts
+            .IsUnique(true); 
 
         modelBuilder.Entity<Car>()
             .Property(c => c.Vin)

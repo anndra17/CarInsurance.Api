@@ -5,9 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CarInsurance.Api.Services;
 
-public class CarService(AppDbContext db): ICarService
+public class CarService(AppDbContext db, IPolicyValidationService policyValidationService) : ICarService
 {
     private readonly AppDbContext _db = db;
+    private readonly IPolicyValidationService _policyValidationService = policyValidationService;
+
 
     public async Task<List<CarDto>> ListCarsAsync()
     {
@@ -19,20 +21,18 @@ public class CarService(AppDbContext db): ICarService
 
     public async Task<bool> IsInsuranceValidAsync(long carId, DateOnly date)
     {
-        var carExists = await _db.Cars.AnyAsync(c => c.Id == carId);
-        if (!carExists) throw new KeyNotFoundException($"Car {carId} not found");
+        var carExists = await _policyValidationService.CarExistsAsync(carId);
+        if (!carExists)
+            throw new KeyNotFoundException($"Car {carId} not found");
 
-        return await _db.Policies.AnyAsync(p =>
-            p.CarId == carId &&
-            p.StartDate <= date &&
-            p.EndDate >= date
-        );
+        return await _policyValidationService.ValidateInsuranceCoverageAsync(carId, date);
     }
 
     public async Task<List<InsurancePolicyDto>> GetCarPoliciesAsync(long carId)
     {
-        var carExists = await _db.Cars.AnyAsync(c => c.Id == carId);
-        if (!carExists) throw new KeyNotFoundException($"Car {carId} not found");
+        var carExists = await _policyValidationService.CarExistsAsync(carId);
+        if (!carExists) 
+            throw new KeyNotFoundException($"Car {carId} not found");
 
         return await _db.Policies
             .Where(p => p.CarId == carId)
@@ -51,8 +51,9 @@ public class CarService(AppDbContext db): ICarService
         if (startDate >= endDate)
             throw new ArgumentException("Start date must be before end date");
 
-        var carExists = await _db.Cars.AnyAsync(C => C.Id == carId);
-        if (!carExists) throw new KeyNotFoundException($"Car {carId} not found");
+        var carExists = await _policyValidationService.CarExistsAsync(carId);
+        if (!carExists) 
+            throw new KeyNotFoundException($"Car {carId} not found");
 
         var hasOverlap = await _db.Policies.AnyAsync(p =>
             p.CarId == carId &&

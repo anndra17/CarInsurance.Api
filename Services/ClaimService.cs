@@ -5,25 +5,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CarInsurance.Api.Services
 {
-    public class ClaimService(AppDbContext db) : IClaimService
+    public class ClaimService(AppDbContext db, IPolicyValidationService policyValidationService) : IClaimService
     {
         private readonly AppDbContext _db = db;
+        private readonly IPolicyValidationService _policyValidationService = policyValidationService;
 
-        public async Task<ClaimDto> CreateClaimAsync(long carId, CreateClaimRequest request)
+
+        public async Task<ClaimDto> CreateClaimAsync(long carId, CreateClaimRequest request, DateOnly claimDate)
         {
             if (request.Amount <= 0)
             {
                 throw new ArgumentException("Amount must be greater than zero.");
             }
 
-            if (!DateOnly.TryParse(request.ClaimDate, out var claimDate))
-                throw new ArgumentException("Invalid claim date format. Use YYYY-MM-DD.");
-
+            if (claimDate > DateOnly.FromDateTime(DateTime.UtcNow))
+                throw new ArgumentException("Claim date cannot be in the future.");
 
             using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
-                var carExists = await _db.Cars.AnyAsync(c => c.Id == carId);
+                var carExists = await _policyValidationService.CarExistsAsync(carId);
                 if (!carExists)
                     throw new KeyNotFoundException($"Car with ID {carId} not found.");
 
@@ -91,7 +92,7 @@ namespace CarInsurance.Api.Services
 
         public async Task<CarHistoryDto> GetCarHistoryAsync(long carId)
         {
-            var carExists = await _db.Cars.AnyAsync(c => c.Id == carId);
+            var carExists = await _policyValidationService.CarExistsAsync(carId);
             if (!carExists)
                 throw new KeyNotFoundException($"Car with ID {carId} not found.");
 

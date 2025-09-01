@@ -16,7 +16,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ICarService, CarService>();
-builder.Services.AddScoped<IClaimService, ClaimService>(); 
+builder.Services.AddScoped<IClaimService, ClaimService>();
+builder.Services.AddScoped<IPolicyValidationService, PolicyValidationService>();
 
 
 var app = builder.Build();
