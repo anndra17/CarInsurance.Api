@@ -6,9 +6,14 @@ namespace CarInsurance.Api.Controllers
 {
     [ApiController]
     [Route("api")]
-    public class ClaimsController(IClaimService claimService) : ControllerBase
+    public class ClaimsController : ControllerBase
     {
-        private readonly IClaimService _claimService = claimService;
+        private readonly IClaimService _claimService;
+
+        public ClaimsController(IClaimService claimService)
+        {
+            _claimService = claimService;
+        }
 
         [HttpGet("cars/{carId:long}/history")]
         public async Task<ActionResult<CarHistoryDto>> GetCarHistory(long carId)

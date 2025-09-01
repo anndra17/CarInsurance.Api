@@ -6,9 +6,14 @@ namespace CarInsurance.Api.Controllers;
 
 [ApiController]
 [Route("api")]
-public class CarsController(ICarService service) : ControllerBase
+public class CarsController : ControllerBase
 {
-    private readonly ICarService _service = service;
+    private readonly ICarService _service;
+
+    public CarsController(ICarService service)
+    {
+        _service = service;
+    }
 
     [HttpGet("cars")]
     public async Task<ActionResult<List<CarDto>>> GetCars()
@@ -20,15 +25,13 @@ public class CarsController(ICarService service) : ControllerBase
         if (string.IsNullOrWhiteSpace(date))
             return BadRequest("Date parameter is required. Use YYYY-MM-DD format.");
 
-        if (!DateOnly.TryParse(date, out var parsed))
-        {
-            if (DateTime.TryParse(date, out var dateTime))
-            {
-                if (dateTime.Year < 1900 || dateTime.Year > 2100)
-                    return BadRequest("Invalid date: Year must be between 1900 and 2100.");
-            }
+        if (!DateOnly.TryParseExact(date, "yyyy-MM-dd", out var parsed))
             return BadRequest("Invalid date format. Use YYYY-MM-DD format (e.g., 2024-03-15).");
-        }
+
+
+        if (parsed.Year < 1900 || parsed.Year > 2200)
+            return BadRequest("Invalid date: Year must be between 1900 and 2200.");
+
 
         try
         {
