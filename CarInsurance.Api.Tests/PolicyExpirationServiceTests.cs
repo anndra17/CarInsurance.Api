@@ -4,7 +4,6 @@ using CarInsurance.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moq;
 using Xunit;
 
 namespace CarInsurance.Api.Tests.Services;
@@ -35,14 +34,11 @@ public class PolicyExpirationServiceTests : IDisposable
         });
         _logger = loggerFactory.CreateLogger<PolicyExpirationService>();
 
-        // Create a mock service scope factory
-        var mockServiceScope = new Mock<IServiceScope>();
-        mockServiceScope.Setup(x => x.ServiceProvider.GetRequiredService<AppDbContext>()).Returns(_db);
-
-        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
-        mockServiceScopeFactory.Setup(x => x.CreateScope()).Returns(mockServiceScope.Object);
-
-        _serviceScopeFactory = mockServiceScopeFactory.Object;
+        // Create a real service provider for testing
+        var services = new ServiceCollection();
+        services.AddSingleton(_db);
+        var serviceProvider = services.BuildServiceProvider();
+        _serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
 
         SeedTestData().Wait();
     }

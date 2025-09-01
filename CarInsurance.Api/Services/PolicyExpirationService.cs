@@ -11,7 +11,7 @@ namespace CarInsurance.Api.Services
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<PolicyExpirationService> _logger;
-        private readonly TimeSpan _executionInterval = TimeSpan.FromMinutes(30);
+        private readonly TimeSpan _executionInterval = TimeSpan.FromMinutes(1);
 
         public PolicyExpirationService(IServiceScopeFactory serviceScopeFactory, ILogger<PolicyExpirationService> logger)
         {
