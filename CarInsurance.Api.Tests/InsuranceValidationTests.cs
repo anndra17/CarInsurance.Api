@@ -19,14 +19,12 @@ namespace CarInsurance.Api.Tests
 
         public InsuranceValidationTests()
         {
-            // ACID: Each test gets fresh in-memory database for isolation
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             _context = new AppDbContext(options);
 
-            // DIP: Using dependency injection pattern in tests
             _policyValidationService = new PolicyValidationService(_context);
             _carService = new CarService(_context, _policyValidationService);
             _controller = new CarsController(_carService);
@@ -36,7 +34,6 @@ namespace CarInsurance.Api.Tests
 
         private void SeedTestData()
         {
-            // ACID: Single transaction ensures consistent test data setup
             var owner = new Owner { Id = 1, Name = "Test Owner", Email = "test@example.com" };
             var car = new Car
             {
@@ -220,7 +217,7 @@ namespace CarInsurance.Api.Tests
         [Fact]
         public async Task PolicyValidationService_CarExistsAsync_ExistingCar_ReturnsTrue()
         {
-            // Arrange & Act - SRP: Testing single responsibility
+            // Arrange & Act
             var exists = await _policyValidationService.CarExistsAsync(1);
 
             // Assert
@@ -230,7 +227,7 @@ namespace CarInsurance.Api.Tests
         [Fact]
         public async Task PolicyValidationService_CarExistsAsync_NonExistentCar_ReturnsFalse()
         {
-            // Arrange & Act - SRP: Testing single responsibility  
+            // Arrange & Act
             var exists = await _policyValidationService.CarExistsAsync(999);
 
             // Assert
@@ -243,7 +240,7 @@ namespace CarInsurance.Api.Tests
             // Arrange
             var startDate = new DateOnly(2024, 1, 1);
 
-            // Act - SRP: Validation logic isolated in service
+            // Act
             var isValid = await _policyValidationService.ValidateInsuranceCoverageAsync(1, startDate);
 
             // Assert
@@ -256,14 +253,14 @@ namespace CarInsurance.Api.Tests
             // Arrange
             var endDate = new DateOnly(2024, 12, 31);
 
-            // Act - SRP: Validation logic isolated in service
+            // Act
             var isValid = await _policyValidationService.ValidateInsuranceCoverageAsync(1, endDate);
 
             // Assert
             Assert.True(isValid, "Coverage should include end date boundary");
         }
 
-        // ============= INTEGRATION TESTS (ACID COMPLIANCE) =============
+        // ============= INTEGRATION TESTS =============
 
         [Fact]
         public async Task IsInsuranceValid_ConcurrentRequests_ReturnConsistentResults()
@@ -272,7 +269,7 @@ namespace CarInsurance.Api.Tests
             var tasks = new List<Task<ActionResult<InsuranceValidityResponse>>>();
             var testDate = "2024-06-15";
 
-            // Act - ACID: Testing isolation of concurrent reads
+            // Act
             for (int i = 0; i < 10; i++)
             {
                 tasks.Add(_controller.IsInsuranceValid(1, testDate));
@@ -280,7 +277,7 @@ namespace CarInsurance.Api.Tests
 
             var results = await Task.WhenAll(tasks);
 
-            // Assert - ACID: All concurrent requests should return same result
+            // Assert
             foreach (var result in results)
             {
                 var okResult = Assert.IsType<OkObjectResult>(result.Result);

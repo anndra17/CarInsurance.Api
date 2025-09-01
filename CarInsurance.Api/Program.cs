@@ -4,6 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
+
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("Default"));
@@ -19,6 +23,10 @@ builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IClaimService, ClaimService>();
 builder.Services.AddScoped<IPolicyValidationService, PolicyValidationService>();
 
+if (builder.Environment.EnvironmentName != "Testing")
+{
+    builder.Services.AddHostedService<PolicyExpirationService>();
+}
 
 var app = builder.Build();
 

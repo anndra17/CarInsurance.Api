@@ -3,6 +3,7 @@ using System;
 using CarInsurance.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarInsurance.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250901122612_AddPolicyExpirationTracking")]
+    partial class AddPolicyExpirationTracking
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.8");
@@ -121,34 +124,6 @@ namespace CarInsurance.Api.Migrations
                     b.ToTable("Owners");
                 });
 
-            modelBuilder.Entity("CarInsurance.Api.Models.PolicyExpiration", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateOnly>("ExpirationDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("LogMessage")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("PolicyId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("ProcessedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExpirationDate");
-
-                    b.HasIndex("PolicyId")
-                        .IsUnique();
-
-                    b.ToTable("PolicyExpirations");
-                });
-
             modelBuilder.Entity("CarInsurance.Api.Models.Car", b =>
                 {
                     b.HasOne("CarInsurance.Api.Models.Owner", "Owner")
@@ -180,17 +155,6 @@ namespace CarInsurance.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Car");
-                });
-
-            modelBuilder.Entity("CarInsurance.Api.Models.PolicyExpiration", b =>
-                {
-                    b.HasOne("CarInsurance.Api.Models.InsurancePolicy", "Policy")
-                        .WithMany()
-                        .HasForeignKey("PolicyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Policy");
                 });
 
             modelBuilder.Entity("CarInsurance.Api.Models.Car", b =>

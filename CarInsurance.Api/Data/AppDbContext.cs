@@ -9,6 +9,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Car> Cars => Set<Car>();
     public DbSet<InsurancePolicy> Policies => Set<InsurancePolicy>();
     public DbSet<Claim> Claims => Set<Claim>();
+    public DbSet<PolicyExpiration> PolicyExpirations { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,6 +38,21 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .Property(c => c.Amount)
             .HasColumnType("decimal(18,2)");
 
+
+        modelBuilder.Entity<PolicyExpiration>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(e => e.Policy)
+                  .WithMany()
+                  .HasForeignKey(e => e.PolicyId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => e.PolicyId)
+                  .IsUnique(); // Prevent duplicate processing
+
+            entity.HasIndex(e => e.ExpirationDate);
+        });
     }
 }
 
